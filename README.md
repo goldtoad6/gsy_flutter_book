@@ -284,6 +284,15 @@
   * [Flutter 在 iOS 26 模拟器跑不起来？其实很简单](Flutter-iOS26-Simulator.md)
   * [Snapchat  开源全新跨平台框架 Valdi  ，一起来搞懂它究竟有什么特别之处](Flutter-Valid.md)
   * [回顾  Flutter Flight Plans  ，关于 Flutter 的现状和官方热门问题解答](Flutter-FlightPlans.md)
+  * [用 AI 做了几个超炫酷的 Flutter 动画，并转成 Web 代码应用在个人主页](Flutter-AI-3.md)
+  * [让 AI 用 Flutter 实现了猗窝座的破坏杀·罗针动画，这个过程如何驯服 AI](Flutter-AI7.md)
+  * [Flutter 真 3D 游戏引擎来了，flame_3d 了解一下](Flutter-F3d.md)
+  * [Flutter UI 设计库解耦重构进度，官方解答未来如何适配](Flutter-FDD.md)
+  * [Flutter 小技巧之帮网友理解 SliverConstraints  overlap](Flutter-overlap.md)
+  * [Flutter 官方正式解决 WebView 在 iOS 26 上有点击问题](Flutter-iOS26-Web2.md)
+  * [再次紧急修复，Flutter  针对 WebView 无法点击问题增加新的快速修复](Flutter-iOS26-Web3.md)
+  * [Flutter 3.38.1 之后，因为某些框架低级错误导致提交 Store  被拒](Flutter-iOS-Store.md)
+  * [Dart  官方再解释为什么放弃了宏编程，并转向优化 build_runner ? 和 Kotlin 的区别又是什么？](Flutter-build_runner.md)
   
 - [Flutter 工程化选择](GCH.md)
   
