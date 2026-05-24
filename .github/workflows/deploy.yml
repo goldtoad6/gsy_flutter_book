@@ -1,0 +1,78 @@
+name: Deploy site (on tag)
+
+on:
+  push:
+    tags:
+      - 'v*'
+      - 'release-*'
+  workflow_dispatch: {}
+
+concurrency:
+  group: deploy-site
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run migration (SUMMARY.md -> docs/)
+        run: pnpm run migrate
+
+      - name: Build VitePress
+        run: pnpm exec vitepress build docs
+
+      - name: Build Pagefind index
+        run: pnpm run search:index
+
+      - name: Show artifact size
+        run: |
+          du -sh docs/.vitepress/dist
+          du -sh docs/.vitepress/dist/pagefind || true
+
+      - name: Setup SSH
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_SSH_PORT || 22 }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H -p "${DEPLOY_PORT}" "${DEPLOY_HOST}" >> ~/.ssh/known_hosts 2>/dev/null
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Deploy via rsync
+        env:
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_SSH_PORT || 22 }}
+        run: |
+          rsync -avz --delete \
+            -e "ssh -p ${DEPLOY_PORT} -o StrictHostKeyChecking=yes" \
+            docs/.vitepress/dist/ \
+            "${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/"
+
+      - name: Summary
+        run: |
+          echo "Deployed tag ${GITHUB_REF_NAME}."

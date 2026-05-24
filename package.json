@@ -1,0 +1,29 @@
+{
+  "name": "gsy-flutter-book",
+  "version": "1.0.0",
+  "private": true,
+  "description": "GSY Flutter Book - Powered by VitePress + Pagefind",
+  "type": "module",
+  "scripts": {
+    "migrate": "node scripts/migrate.mjs",
+    "dev": "vitepress dev docs",
+    "build": "vitepress build docs && pnpm run search:index",
+    "preview": "vitepress preview docs",
+    "search:index": "pagefind --site docs/.vitepress/dist --output-subdir pagefind",
+    "serve:dist": "pnpm run build && npx serve docs/.vitepress/dist"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@9.15.4",
+  "devDependencies": {
+    "vitepress": "1.6.4",
+    "vue": "3.5.33",
+    "pagefind": "1.5.2",
+    "sass": "1.99.0",
+    "typescript": "5.9.3",
+    "fast-glob": "3.3.3",
+    "gray-matter": "4.0.3"
+  }
+}

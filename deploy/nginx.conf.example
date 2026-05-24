@@ -1,0 +1,75 @@
+# ============================================================
+# Nginx config example for VitePress + Pagefind static site.
+#
+# This is an EXAMPLE file checked into the public repo.
+# Replace `your-domain.com` and `/var/www/gsy-flutter-book` with
+# your real values ON THE SERVER ONLY. Never commit your real
+# domain / path / IP back to this file.
+# ============================================================
+
+server {
+    listen 80;
+    server_name your-domain.com;
+
+    # Recommended: redirect to HTTPS in production
+    # return 301 https://$host$request_uri;
+
+    root /var/www/gsy-flutter-book;
+    index index.html;
+
+    charset utf-8;
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript application/wasm text/xml application/xml application/xml+rss text/javascript image/svg+xml;
+    gzip_min_length 1024;
+    gzip_comp_level 6;
+
+    # VitePress builds with cleanUrls: true, so /foo -> /foo.html
+    location / {
+        try_files $uri $uri.html $uri/ /index.html;
+    }
+
+    # Long-term cache for hashed assets
+    location ^~ /assets/ {
+        access_log off;
+        add_header Cache-Control "public, max-age=31536000, immutable";
+        try_files $uri =404;
+    }
+
+    # Pagefind: index shards & wasm should be cached aggressively
+    location ^~ /pagefind/ {
+        access_log off;
+        add_header Cache-Control "public, max-age=31536000, immutable";
+        types {
+            application/javascript js;
+            application/wasm        wasm pagefind;
+            application/octet-stream pf_meta pf_index pf_fragment;
+            text/css                css;
+            application/json        json;
+        }
+        try_files $uri =404;
+    }
+
+    # Public root assets (logo, favicon, etc)
+    location ~* \.(png|jpg|jpeg|gif|svg|webp|ico)$ {
+        access_log off;
+        add_header Cache-Control "public, max-age=2592000";
+        try_files $uri =404;
+    }
+
+    # HTML: revalidate every time so a new deploy is picked up immediately
+    location ~* \.html$ {
+        add_header Cache-Control "no-cache";
+        try_files $uri =404;
+    }
+}
+
+# Optional: HTTPS server (recommended)
+# server {
+#     listen 443 ssl http2;
+#     server_name your-domain.com;
+#
+#     ssl_certificate     /etc/letsencrypt/live/your-domain.com/fullchain.pem;
+#     ssl_certificate_key /etc/letsencrypt/live/your-domain.com/privkey.pem;
+#
+#     # ... copy the location blocks above ...
+# }

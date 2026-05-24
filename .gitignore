@@ -1,2 +1,36 @@
 _book/
 .DS_Store
+
+# Node / pnpm
+node_modules/
+.pnpm-store/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# VitePress
+docs/.vitepress/dist/
+docs/.vitepress/cache/
+
+# Pagefind
+docs/.vitepress/dist/pagefind/
+
+# Editor
+.idea/
+.vscode/
+*.swp
+
+# OS
+Thumbs.db
+
+# Secrets — never commit
+.env
+.env.*
+*.pem
+*.key
+id_rsa
+id_rsa.*
+id_ed25519
+id_ed25519.*
+deploy_key
+deploy_key.*
