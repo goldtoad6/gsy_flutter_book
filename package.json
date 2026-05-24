@@ -10,6 +10,7 @@
     "build": "vitepress build docs && pnpm run search:index",
     "preview": "vitepress preview docs",
     "search:index": "pagefind --site docs/.vitepress/dist --output-subdir pagefind",
+    "build:pdf": "node scripts/build-pdf.mjs",
     "serve:dist": "pnpm run build && npx serve docs/.vitepress/dist"
   },
   "engines": {
@@ -24,6 +25,8 @@
     "sass": "1.99.0",
     "typescript": "5.9.3",
     "fast-glob": "3.3.3",
-    "gray-matter": "4.0.3"
+    "gray-matter": "4.0.3",
+    "puppeteer": "23.11.1",
+    "pdf-lib": "1.17.1"
   }
 }

@@ -14,6 +14,8 @@ concurrency:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # required to create a Release
 
     steps:
       - name: Checkout
@@ -44,10 +46,34 @@ jobs:
       - name: Build Pagefind index
         run: pnpm run search:index
 
+      - name: Build full-site PDF
+        run: pnpm run build:pdf
+
+      - name: Compress PDF with Ghostscript
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ghostscript
+          IN=artifacts/gsy-flutter-book.pdf
+          OUT=artifacts/gsy-flutter-book.compressed.pdf
+          before=$(stat -c%s "$IN")
+          gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.5 -dPDFSETTINGS=/ebook \
+             -dNOPAUSE -dBATCH -dQUIET \
+             -sOutputFile="$OUT" "$IN"
+          after=$(stat -c%s "$OUT")
+          if [ "$after" -lt "$before" ]; then
+            mv "$OUT" "$IN"
+            echo "compressed: $before -> $after bytes"
+          else
+            rm -f "$OUT"
+            echo "compression did not shrink; keeping original ($before bytes)"
+          fi
+          ls -lh "$IN"
+
       - name: Show artifact size
         run: |
           du -sh docs/.vitepress/dist
           du -sh docs/.vitepress/dist/pagefind || true
+          ls -lh artifacts/gsy-flutter-book.pdf || true
 
       - name: Setup SSH
         env:
@@ -62,17 +88,9 @@ jobs:
           # Guarantee the file ends with exactly one newline
           tail -c1 ~/.ssh/id_ed25519 | od -An -c | grep -q '\\n' || printf '\n' >> ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          # ---- Diagnostics (safe: only metadata + boundary lines) ----
-          echo "key bytes : $(wc -c < ~/.ssh/id_ed25519)"
-          echo "key lines : $(wc -l < ~/.ssh/id_ed25519)"
-          echo "first line: $(sed -n '1p' ~/.ssh/id_ed25519)"
-          echo "last line : $(sed -n '$p' ~/.ssh/id_ed25519)"
-          echo "has BEGIN : $(grep -c 'BEGIN OPENSSH PRIVATE KEY' ~/.ssh/id_ed25519 || true)"
-          echo "has END   : $(grep -c 'END OPENSSH PRIVATE KEY'   ~/.ssh/id_ed25519 || true)"
-          echo "trailing  : $(tail -c1 ~/.ssh/id_ed25519 | od -An -c)"
-          # ---- Sanity check ----
+          # Sanity check before use; fail fast with a readable message
           if ! ssh-keygen -y -f ~/.ssh/id_ed25519 > ~/.ssh/id_ed25519.pub; then
-            echo "::error::DEPLOY_SSH_KEY is not a valid OpenSSH private key. Re-paste it (incl. BEGIN/END lines and trailing newline)."
+            echo "::error::DEPLOY_SSH_KEY is not a valid OpenSSH private key."
             exit 1
           fi
           ssh-keyscan -H -p "${DEPLOY_PORT}" "${DEPLOY_HOST}" >> ~/.ssh/known_hosts 2>/dev/null
@@ -89,6 +107,14 @@ jobs:
             -e "ssh -p ${DEPLOY_PORT} -o StrictHostKeyChecking=yes" \
             docs/.vitepress/dist/ \
             "${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/"
+
+      - name: Create GitHub Release with PDF
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          files: artifacts/gsy-flutter-book.pdf
+          fail_on_unmatched_files: true
 
       - name: Summary
         run: |

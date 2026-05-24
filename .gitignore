@@ -15,6 +15,9 @@ docs/.vitepress/cache/
 # Pagefind
 docs/.vitepress/dist/pagefind/
 
+# Build artifacts (PDF for Release etc.)
+artifacts/
+
 # Editor
 .idea/
 .vscode/
