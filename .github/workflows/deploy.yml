@@ -62,7 +62,15 @@ jobs:
           # Guarantee the file ends with exactly one newline
           tail -c1 ~/.ssh/id_ed25519 | od -An -c | grep -q '\\n' || printf '\n' >> ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          # Sanity check before use; fail fast with a readable message
+          # ---- Diagnostics (safe: only metadata + boundary lines) ----
+          echo "key bytes : $(wc -c < ~/.ssh/id_ed25519)"
+          echo "key lines : $(wc -l < ~/.ssh/id_ed25519)"
+          echo "first line: $(sed -n '1p' ~/.ssh/id_ed25519)"
+          echo "last line : $(sed -n '$p' ~/.ssh/id_ed25519)"
+          echo "has BEGIN : $(grep -c 'BEGIN OPENSSH PRIVATE KEY' ~/.ssh/id_ed25519 || true)"
+          echo "has END   : $(grep -c 'END OPENSSH PRIVATE KEY'   ~/.ssh/id_ed25519 || true)"
+          echo "trailing  : $(tail -c1 ~/.ssh/id_ed25519 | od -An -c)"
+          # ---- Sanity check ----
           if ! ssh-keygen -y -f ~/.ssh/id_ed25519 > ~/.ssh/id_ed25519.pub; then
             echo "::error::DEPLOY_SSH_KEY is not a valid OpenSSH private key. Re-paste it (incl. BEGIN/END lines and trailing newline)."
             exit 1
