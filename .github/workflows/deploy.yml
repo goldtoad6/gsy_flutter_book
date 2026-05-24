@@ -49,26 +49,6 @@ jobs:
       - name: Build full-site PDF
         run: pnpm run build:pdf
 
-      - name: Compress PDF with Ghostscript
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq ghostscript
-          IN=artifacts/gsy-flutter-book.pdf
-          OUT=artifacts/gsy-flutter-book.compressed.pdf
-          before=$(stat -c%s "$IN")
-          gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.5 -dPDFSETTINGS=/ebook \
-             -dNOPAUSE -dBATCH -dQUIET \
-             -sOutputFile="$OUT" "$IN"
-          after=$(stat -c%s "$OUT")
-          if [ "$after" -lt "$before" ]; then
-            mv "$OUT" "$IN"
-            echo "compressed: $before -> $after bytes"
-          else
-            rm -f "$OUT"
-            echo "compression did not shrink; keeping original ($before bytes)"
-          fi
-          ls -lh "$IN"
-
       - name: Show artifact size
         run: |
           du -sh docs/.vitepress/dist
