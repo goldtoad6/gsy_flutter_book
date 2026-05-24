@@ -14,7 +14,7 @@
 
 ----
 
-- ### [在线阅读地址](https://guoshuyu.cn/)
+- ### [在线阅读地址](https://guoshuyu.cn/home/wx/)
 
 - ### [PDF 下载地址（GitHub Release，每次发版自动更新）](https://github.com/CarGuo/gsy_flutter_book/releases/latest)
 

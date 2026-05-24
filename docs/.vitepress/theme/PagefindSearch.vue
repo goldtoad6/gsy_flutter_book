@@ -33,15 +33,16 @@ async function loadPagefind() {
   if (pagefind) return pagefind
   if (pagefindLoading) return pagefindLoading
   pagefindLoading = (async () => {
+    const base = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
     const id = 'pagefind-ui-css'
     if (typeof document !== 'undefined' && !document.getElementById(id)) {
       const link = document.createElement('link')
       link.id = id
       link.rel = 'stylesheet'
-      link.href = '/pagefind/pagefind-ui.css'
+      link.href = `${base}/pagefind/pagefind-ui.css`
       document.head.appendChild(link)
     }
-    const importPath = '/pagefind/pagefind.js'
+    const importPath = `${base}/pagefind/pagefind.js`
     const dynImport = new Function('p', 'return import(p)') as (p: string) => Promise<any>
     const mod = await dynImport(importPath)
     if (mod.options) {

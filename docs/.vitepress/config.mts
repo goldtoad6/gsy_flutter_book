@@ -5,12 +5,13 @@ export default {
   title: 'GSY Flutter Book',
   description: 'GSY Flutter / Dart 系列文章合集 — 由 VitePress + Pagefind 驱动',
   lang: 'zh-CN',
+  base: '/home/wx/',
   cleanUrls: true,
   lastUpdated: true,
   ignoreDeadLinks: true,
 
   head: [
-    ['link', { rel: 'icon', href: '/logo.png' }],
+    ['link', { rel: 'icon', href: '/home/wx/logo.png' }],
     ['meta', { name: 'theme-color', content: '#3eaf7c' }]
   ],
 

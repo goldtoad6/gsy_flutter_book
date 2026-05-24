@@ -22,6 +22,9 @@ import { PDFDocument } from 'pdf-lib'
 const DIST = resolve('docs/.vitepress/dist')
 const OUT  = resolve('artifacts/gsy-flutter-book.pdf')
 const PORT = 4173
+// Must match vitepress config.mts `base`. Stripped from incoming request paths
+// so the dist root maps to `/<base>/...` URLs.
+const BASE = '/home/wx/'
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -45,6 +48,12 @@ function startServer() {
   const server = createServer(async (req, res) => {
     try {
       let urlPath = decodeURIComponent(req.url.split('?')[0])
+      // Strip the configured site base so dist files resolve correctly.
+      if (BASE !== '/' && urlPath.startsWith(BASE)) {
+        urlPath = '/' + urlPath.slice(BASE.length)
+      } else if (BASE !== '/' && urlPath === BASE.slice(0, -1)) {
+        urlPath = '/'
+      }
       if (urlPath.endsWith('/')) urlPath += 'index.html'
       let fp = join(DIST, urlPath)
       try {
@@ -101,8 +110,10 @@ async function main() {
   let i = 0
   for (const link of subset) {
     i++
-    const url = `http://127.0.0.1:${PORT}${link}`
-    process.stdout.write(`[pdf] (${i}/${subset.length}) ${link} ... `)
+    // sidebar links are like "/guide/Flutter-1"; prepend BASE for the live URL.
+    const urlPath = (BASE !== '/' ? BASE.replace(/\/$/, '') : '') + link
+    const url = `http://127.0.0.1:${PORT}${urlPath}`
+    process.stdout.write(`[pdf] (${i}/${subset.length}) ${urlPath} ... `)
     try {
       await page.goto(url, { waitUntil: 'networkidle0', timeout: 60_000 })
       // Hide nav/sidebar/footer for cleaner print
