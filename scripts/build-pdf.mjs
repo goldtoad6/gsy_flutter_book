@@ -105,15 +105,12 @@ async function main() {
     process.stdout.write(`[pdf] (${i}/${subset.length}) ${link} ... `)
     try {
       await page.goto(url, { waitUntil: 'networkidle0', timeout: 60_000 })
-      // Hide nav/sidebar/footer for cleaner print, and shrink images for sane file size
+      // Hide nav/sidebar/footer for cleaner print
       await page.addStyleTag({ content: `
         .VPNav, .VPSidebar, .VPLocalNav, .VPFooter, .VPDocFooter,
         .pf-search-trigger, [data-pagefind-ignore]{ display:none !important; }
         .VPContent, .VPDoc, .VPDoc .container { padding: 0 !important; margin: 0 !important; }
         body { background: #fff !important; }
-        /* Cap image size aggressively so a 275-page PDF stays under ~150MB */
-        img { max-width: 360px !important; max-height: 240px !important; height: auto !important; image-rendering: auto; }
-        figure img, p img { max-width: 360px !important; }
       `})
       const buf = await page.pdf({
         format: 'A4',
